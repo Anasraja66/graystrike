@@ -1,0 +1,86 @@
+name: "APT Agents Security Gate"
+description: "Autonomous AI penetration testing, regression detection, and security gate enforcement for Pull Requests and CI/CD pipelines."
+author: "APT Agents (Anas Technology)"
+
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  api_url:
+    description: "APT Agents API Base URL"
+    required: false
+    default: "https://api.aptagents.io"
+  api_key:
+    description: "Machine-to-machine APT Agents API Key (store in GitHub Secrets: secrets.APT_API_KEY)"
+    required: true
+  project_id:
+    description: "Target Project UUID registered in APT Agents"
+    required: true
+  target_url:
+    description: "Optional staging / preview URL to test (must be within authorized project scope)"
+    required: false
+    default: ""
+  fail_on:
+    description: "Minimum severity threshold that blocks the build: critical, high, medium, low, none"
+    required: false
+    default: "high"
+  fail_on_regression_only:
+    description: "If true, blocks only if new vulnerabilities or regressions are detected"
+    required: false
+    default: "false"
+  allow_initial_baseline:
+    description: "If true, establishes baseline on first project scan without failing build"
+    required: false
+    default: "true"
+  github_token:
+    description: "GitHub token (secrets.GITHUB_TOKEN) used for publishing Check Runs and PR comments"
+    required: false
+    default: ""
+  timeout_seconds:
+    description: "Maximum scan duration before timing out (in seconds)"
+    required: false
+    default: "600"
+  poll_interval:
+    description: "Polling interval in seconds"
+    required: false
+    default: "5"
+
+outputs:
+  scan_id:
+    description: "Unique UUID of the executed security scan"
+    value: ${{ steps.run-scan.outputs.scan_id }}
+  gate_passed:
+    description: "Whether the security gate passed (true/false)"
+    value: ${{ steps.run-scan.outputs.gate_passed }}
+  new_findings_count:
+    description: "Count of new vulnerabilities introduced in this PR"
+    value: ${{ steps.run-scan.outputs.new_findings_count }}
+  regressions_count:
+    description: "Count of regressions (previously fixed bugs that reappeared)"
+    value: ${{ steps.run-scan.outputs.regressions_count }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Execute APT Agents Security Assessment
+      id: run-scan
+      shell: bash
+      env:
+        APT_API_URL: ${{ inputs.api_url }}
+        APT_API_KEY: ${{ inputs.api_key }}
+        APT_PROJECT_ID: ${{ inputs.project_id }}
+        APT_TARGET_URL: ${{ inputs.target_url }}
+        APT_FAIL_ON: ${{ inputs.fail_on }}
+        APT_FAIL_ON_REGRESSION_ONLY: ${{ inputs.fail_on_regression_only }}
+        APT_ALLOW_INITIAL_BASELINE: ${{ inputs.allow_initial_baseline }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        APT_SCAN_TIMEOUT: ${{ inputs.timeout_seconds }}
+        APT_POLL_INTERVAL: ${{ inputs.poll_interval }}
+      run: |
+        python "${{ github.action_path }}/../../ci/apt_ci_client.py"

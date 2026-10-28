@@ -1,0 +1,70 @@
+name: "APT Agents Security Gate"
+
+on:
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+    types: [ opened, synchronize, reopened ]
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Target preview / staging URL (must be in authorized project scope)"
+        required: false
+        default: ""
+      fail_on:
+        description: "Fail build on severity threshold"
+        required: false
+        default: "high"
+        type: choice
+        options:
+          - "critical"
+          - "high"
+          - "medium"
+          - "low"
+          - "none"
+
+# Prevent duplicate workflow runs on fast subsequent commits
+concurrency:
+  group: apt-security-gate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  security-assessment:
+    name: "Autonomous Security & Regression Assessment"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run APT Agents Security Gate
+        id: apt_scan
+        uses: ./.github/actions/apt-scan
+        with:
+          api_url: ${{ vars.APT_API_URL || 'https://api.aptagents.io' }}
+          api_key: ${{ secrets.APT_API_KEY }}
+          project_id: ${{ vars.APT_PROJECT_ID }}
+          target_url: ${{ github.event.inputs.target_url || '' }}
+          fail_on: ${{ github.event.inputs.fail_on || 'high' }}
+          fail_on_regression_only: "false"
+          allow_initial_baseline: "true"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          timeout_seconds: 600
+          poll_interval: 5
+
+      - name: Log Gate Status
+        run: |
+          echo "Scan ID: ${{ steps.apt_scan.outputs.scan_id }}"
+          echo "Gate Passed: ${{ steps.apt_scan.outputs.gate_passed }}"
+          echo "New Findings: ${{ steps.apt_scan.outputs.new_findings_count }}"
+          echo "Regressions: ${{ steps.apt_scan.outputs.regressions_count }}"
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true
+        with:
+          sarif_file: results.sarif
