@@ -7,10 +7,14 @@ Targeting vulnerabilities in Lovable.dev, Bolt.new, v0 (Vercel), Cursor, Supabas
 42. LLMEndpointExposureAgent (Unauthenticated AI/LLM Chat Endpoints & Token Exhaustion - CWE-1426)
 43. WebhookSignatureIntegrityAgent (Payment & SaaS Webhook Signature Verifier - CWE-345)
 44. ClientSideAuthBypassAgent (Client-Side Route Gatekeeper & Admin Leak Agent - CWE-285)
+
+All findings upgraded with P0 Structured Verification Evidence (cURL, expected/observed behavior, status codes).
 """
 import re
 import base64
-from typing import Dict, Any, Optional
+import json
+from datetime import datetime, timezone
+from typing import Dict, Any, Optional, List
 from urllib.parse import urlparse
 import httpx
 
@@ -23,16 +27,26 @@ from ai_engine.agents.base_agent import (
 class SupabaseRlsAuditorAgent(BaseSecurityAgent):
     id = "supabase_rls_auditor"
     name = "Supabase & Firebase RLS Exposure Inspector"
-    description = "Inspects AI-generated apps (Lovable, Bolt, v0) for exposed Supabase/Firebase endpoints with disabled Row-Level Security (RLS)."
+    description = "Scientifically inspects AI-generated apps (Lovable, Bolt, v0) for exposed Supabase/Firebase endpoints with disabled or overly permissive Row-Level Security (RLS)."
     category = "broken_access_control"
     cwe_default = "CWE-284"
     owasp_default = "A01:2021-Broken Access Control"
     is_passive = True
 
-    COMMON_TABLES = ["users", "profiles", "orders", "customers", "transactions", "leads", "settings", "posts"]
+    # Tables categorized by sensitivity
+    PRIVATE_TABLES = ["users", "profiles", "orders", "customers", "transactions", "leads", "accounts", "payments"]
+    PUBLIC_CANDIDATE_TABLES = ["posts", "articles", "settings", "categories", "products", "tags"]
+    ALL_PROBE_TABLES = PRIVATE_TABLES + PUBLIC_CANDIDATE_TABLES
+
+    SENSITIVE_FIELD_INDICATORS = {
+        "email", "phone", "password", "hash", "token", "secret", "user_id", 
+        "billing", "stripe_customer_id", "credit", "balance", "address", 
+        "role", "ssn", "payment_method", "api_key"
+    }
 
     async def assess(self, target_url: str, crawl_data: Dict[str, Any], knowledge_context: Optional[str] = None) -> AgentExecutionResult:
         findings = []
+        now_ts = datetime.now(timezone.utc).isoformat()
 
         # Step 1: Detect Supabase Project URL in page scripts or content
         supabase_urls = set()
@@ -54,43 +68,168 @@ class SupabaseRlsAuditorAgent(BaseSecurityAgent):
         if not supabase_urls:
             return AgentExecutionResult(agent_id=self.id, success=True, findings=[])
 
-        # Step 2: Probe Supabase REST endpoints for open tables (RLS disabled)
-        headers = {"User-Agent": "APTAgents-AIAppAuditor/1.0"}
-        if anon_keys:
-            headers["apikey"] = list(anon_keys)[0]
-            headers["Authorization"] = f"Bearer {list(anon_keys)[0]}"
+        # Step 2: Probe Supabase REST endpoints for open tables (scientific verification)
+        chosen_key = list(anon_keys)[0] if anon_keys else ""
+        headers = {"User-Agent": "GrayStrike-RLSAuditor/1.0"}
+        if chosen_key:
+            headers["apikey"] = chosen_key
+            headers["Authorization"] = f"Bearer {chosen_key}"
 
         for sp_url in list(supabase_urls)[:2]:
             async with httpx.AsyncClient(timeout=4.0, headers=headers) as client:
-                for table in self.COMMON_TABLES:
+                for table in self.ALL_PROBE_TABLES:
                     rest_endpoint = f"{sp_url}/rest/v1/{table}?select=*&limit=1"
+                    curl_cmd = f"curl -sS -i -H 'apikey: {chosen_key}' '{rest_endpoint}'"
+                    raw_req = f"GET /rest/v1/{table}?select=*&limit=1 HTTP/1.1\nHost: {urlparse(sp_url).netloc}\napikey: {chosen_key[:12]}..."
+
                     try:
                         resp = await client.get(rest_endpoint)
-                        if resp.status_code == 200 and resp.text.startswith("["):
-                            findings.append(AgentFinding(
-                                title=f"Critical Supabase RLS Disabled: Table '{table}' Publicly Queryable Without Auth",
-                                category=self.category,
-                                cwe_id=self.cwe_default,
-                                owasp_ref=self.owasp_default,
-                                severity=AgentSeverity.CRITICAL,
-                                confidence=0.98,
-                                risk_score=0.98,
-                                affected_asset=rest_endpoint,
-                                evidence_summary=f"Public HTTP GET to '{rest_endpoint}' returned HTTP 200 with raw table records.",
-                                business_impact="COMPETITOR & DATA THEFT: Anyone on the internet can read or download your entire customer, order, or profile database directly from their browser console without needing any password.",
-                                technical_explanation="In apps generated by Claude or Lovable, developers frequently disable Row-Level Security (ALTER TABLE table DISABLE ROW LEVEL SECURITY) or create 'USING (true)' policies to fix initial bugs. This exposes the REST API to unauthenticated bulk scraping.",
-                                remediation_steps=f"Enable Row-Level Security on table '{table}' and enforce policies matching auth.uid() = user_id.",
-                                ai_fix_prompt=(
-                                    f"Hey Claude / Lovable: Our security audit detected that Row-Level Security (RLS) is disabled or "
-                                    f"publicly open on table '{table}'. Please write a Supabase SQL migration to: "
-                                    f"1. Enable RLS: 'ALTER TABLE {table} ENABLE ROW LEVEL SECURITY;' "
-                                    f"2. Create a policy: 'CREATE POLICY \"Users can only access their own {table}\" ON {table} "
-                                    f"FOR ALL USING (auth.uid() = user_id);' "
-                                    f"Please apply this migration immediately."
-                                ),
-                                references=["https://supabase.com/docs/guides/auth/row-level-security"]
-                            ))
-                            break  # One confirmed open table is sufficient proof
+                        if resp.status_code == 200:
+                            resp_text = resp.text
+                            resp_json = None
+                            try:
+                                resp_json = resp.json()
+                            except Exception:
+                                pass
+
+                            # SCIENTIFIC EVALUATION:
+                            # 1. Check if empty array [] returned -> Inconclusive / Suspected, NOT confirmed critical breach
+                            if isinstance(resp_json, list) and len(resp_json) == 0:
+                                findings.append(AgentFinding(
+                                    title=f"Potential Unrestricted Table Endpoint '{table}' (Empty Result Returned)",
+                                    category=self.category,
+                                    cwe_id=self.cwe_default,
+                                    owasp_ref=self.owasp_default,
+                                    severity=AgentSeverity.LOW,
+                                    confidence=0.40,
+                                    risk_score=0.25,
+                                    affected_asset=rest_endpoint,
+                                    evidence_summary=f"HTTP GET to '{rest_endpoint}' returned HTTP 200 with empty list '[]'. Row-Level Security may be active with filter 'USING (auth.uid() = user_id)' or table has zero records.",
+                                    technical_explanation="When RLS is active with an auth.uid() check, anonymous queries receive an empty list [] rather than HTTP 401. This is expected behavior unless table is empty.",
+                                    remediation_steps=f"Verify that table '{table}' has Row-Level Security explicitly enabled (ALTER TABLE {table} ENABLE ROW LEVEL SECURITY).",
+                                    verification_status="inconclusive",
+                                    verification_method="active_probe",
+                                    reproduction_curl=curl_cmd,
+                                    expected_secure_behavior="Returns HTTP 401 or empty array due to auth.uid() filter.",
+                                    observed_insecure_behavior="Received HTTP 200 with 0 records returned. Requires authenticated verification.",
+                                    raw_http_request=raw_req,
+                                    raw_http_response_snippet=resp_text[:500],
+                                    response_status_code=resp.status_code,
+                                    response_content_length=len(resp.content),
+                                    observation_timestamp=now_ts,
+                                    sensitive_data_detected=[],
+                                    reproduction_confidence=0.45,
+                                    references=["https://supabase.com/docs/guides/auth/row-level-security"]
+                                ))
+                                continue
+
+                            # 2. Check if records returned with data
+                            elif isinstance(resp_json, list) and len(resp_json) > 0:
+                                sample_row = resp_json[0]
+                                exposed_keys = []
+                                if isinstance(sample_row, dict):
+                                    exposed_keys = [
+                                        k for k in sample_row.keys() 
+                                        if any(s in k.lower() for s in self.SENSITIVE_FIELD_INDICATORS)
+                                    ]
+
+                                # CASE A: Sensitive PII columns actively leaked -> CONFIRMED CRITICAL
+                                if exposed_keys:
+                                    findings.append(AgentFinding(
+                                        title=f"Critical Supabase RLS Disabled: Sensitive PII Exposed in Table '{table}' ({', '.join(exposed_keys)})",
+                                        category=self.category,
+                                        cwe_id=self.cwe_default,
+                                        owasp_ref=self.owasp_default,
+                                        severity=AgentSeverity.CRITICAL,
+                                        confidence=0.99,
+                                        risk_score=0.98,
+                                        affected_asset=rest_endpoint,
+                                        evidence_summary=f"Public HTTP GET to '{rest_endpoint}' returned HTTP 200 with populated database records leaking sensitive columns: {exposed_keys}.",
+                                        business_impact="UNAUTHORIZED DATA EXFILTRATION: Anonymous visitors can dump customer records, credentials, or transactions directly through the Supabase REST API without authentication.",
+                                        technical_explanation="Row-Level Security (RLS) is either disabled or configured with an overly permissive policy (e.g. 'FOR SELECT USING (true)') that permits unauthenticated bulk data harvesting.",
+                                        remediation_steps=f"Immediately enable RLS: 'ALTER TABLE {table} ENABLE ROW LEVEL SECURITY;' and restrict reads: 'CREATE POLICY \"User access\" ON {table} FOR SELECT USING (auth.uid() = user_id);'.",
+                                        ai_fix_prompt=(
+                                            f"Hey Claude / Lovable: Our security audit confirmed that Row-Level Security (RLS) is leaking private data in table '{table}' (columns: {exposed_keys}). "
+                                            f"Please write a Supabase SQL migration to: "
+                                            f"1. Enable RLS: 'ALTER TABLE {table} ENABLE ROW LEVEL SECURITY;' "
+                                            f"2. Add policy: 'CREATE POLICY \"Users can only read their own {table}\" ON {table} FOR SELECT USING (auth.uid() = user_id);' "
+                                            f"Apply this migration immediately."
+                                        ),
+                                        verification_status="confirmed",
+                                        verification_method="active_probe",
+                                        reproduction_curl=curl_cmd,
+                                        expected_secure_behavior="HTTP 401 Unauthorized or filtered empty array when unauthenticated.",
+                                        observed_insecure_behavior=f"HTTP 200 returned with raw table records exposing sensitive keys: {exposed_keys}.",
+                                        raw_http_request=raw_req,
+                                        raw_http_response_snippet=resp_text[:1000],
+                                        response_status_code=resp.status_code,
+                                        response_content_length=len(resp.content),
+                                        observation_timestamp=now_ts,
+                                        sensitive_data_detected=exposed_keys,
+                                        reproduction_confidence=0.99,
+                                        references=["https://supabase.com/docs/guides/auth/row-level-security"]
+                                    ))
+                                    break
+
+                                # CASE B: Private table populated without sensitive keywords -> HIGH CONFIRMED
+                                elif table in self.PRIVATE_TABLES:
+                                    findings.append(AgentFinding(
+                                        title=f"Supabase Permissive RLS Policy: Private Table '{table}' Readable by Anonymous Users",
+                                        category=self.category,
+                                        cwe_id=self.cwe_default,
+                                        owasp_ref=self.owasp_default,
+                                        severity=AgentSeverity.HIGH,
+                                        confidence=0.92,
+                                        risk_score=0.85,
+                                        affected_asset=rest_endpoint,
+                                        evidence_summary=f"Unauthenticated HTTP GET to private table '{table}' returned {len(resp_json)} record(s).",
+                                        business_impact="UNAUTHORIZED READ: Anonymous users can enumerate internal records.",
+                                        technical_explanation="Table contains an open SELECT policy allowing public anonymous reads.",
+                                        remediation_steps=f"Enforce restrictive RLS policy on '{table}'.",
+                                        verification_status="confirmed",
+                                        verification_method="active_probe",
+                                        reproduction_curl=curl_cmd,
+                                        expected_secure_behavior="Access restricted to authenticated owners.",
+                                        observed_insecure_behavior=f"Received HTTP 200 with {len(resp_json)} active row(s).",
+                                        raw_http_request=raw_req,
+                                        raw_http_response_snippet=resp_text[:800],
+                                        response_status_code=resp.status_code,
+                                        response_content_length=len(resp.content),
+                                        observation_timestamp=now_ts,
+                                        sensitive_data_detected=[],
+                                        reproduction_confidence=0.92,
+                                        references=["https://supabase.com/docs/guides/auth/row-level-security"]
+                                    ))
+                                    break
+
+                                # CASE C: Public content table (posts/products) -> LOW SUSPECTED (Likely Intended)
+                                else:
+                                    findings.append(AgentFinding(
+                                        title=f"Publicly Readable Supabase Table: '{table}' (Verify Public Intent)",
+                                        category=self.category,
+                                        cwe_id="CWE-200",
+                                        owasp_ref=self.owasp_default,
+                                        severity=AgentSeverity.LOW,
+                                        confidence=0.70,
+                                        risk_score=0.20,
+                                        affected_asset=rest_endpoint,
+                                        evidence_summary=f"Table '{table}' is publicly readable by anonymous clients.",
+                                        business_impact="INFORMATIONAL: Confirm whether public read access to '{table}' is intended (e.g. public blog or product catalog).",
+                                        technical_explanation="Public read policy is active. If data is meant to be public, this is intended behavior.",
+                                        remediation_steps="If content should be private, restrict SELECT policy to authenticated sessions.",
+                                        verification_status="suspected",
+                                        verification_method="active_probe",
+                                        reproduction_curl=curl_cmd,
+                                        expected_secure_behavior="Verify whether public read policy is by design.",
+                                        observed_insecure_behavior=f"HTTP 200 with {len(resp_json)} record(s).",
+                                        raw_http_request=raw_req,
+                                        raw_http_response_snippet=resp_text[:500],
+                                        response_status_code=resp.status_code,
+                                        response_content_length=len(resp.content),
+                                        observation_timestamp=now_ts,
+                                        reproduction_confidence=0.80,
+                                        references=["https://supabase.com/docs/guides/auth/row-level-security"]
+                                    ))
                     except Exception:
                         continue
 
@@ -119,7 +258,8 @@ class ClientBundleSecretLeakAgent(BaseSecurityAgent):
 
     async def assess(self, target_url: str, crawl_data: Dict[str, Any], knowledge_context: Optional[str] = None) -> AgentExecutionResult:
         findings = []
-        headers = {"User-Agent": "APTAgents-SecretDetector/1.0"}
+        now_ts = datetime.now(timezone.utc).isoformat()
+        headers = {"User-Agent": "GrayStrike-SecretDetector/1.0"}
 
         # Collect scripts
         script_urls = set()
@@ -134,6 +274,8 @@ class ClientBundleSecretLeakAgent(BaseSecurityAgent):
                     res = await client.get(s_url)
                     if res.status_code == 200:
                         content = res.text
+                        curl_cmd = f"curl -sS '{s_url}'"
+
                         for pattern in self.SECRET_PATTERNS:
                             matches = re.findall(pattern["regex"], content)
                             if matches:
@@ -158,6 +300,17 @@ class ClientBundleSecretLeakAgent(BaseSecurityAgent):
                                         f"2. Never use NEXT_PUBLIC_ for secret keys. "
                                         f"3. Make sure the client only receives sanitized public responses."
                                     ),
+                                    verification_status="confirmed",
+                                    verification_method="active_probe",
+                                    reproduction_curl=f"{curl_cmd} | grep -E '{pattern['regex'][:25]}'",
+                                    expected_secure_behavior="Client JavaScript bundles must never contain backend secret API credentials.",
+                                    observed_insecure_behavior=f"Raw cryptographic secret token '{leaked_sample}' discovered in public bundle.",
+                                    raw_http_response_snippet=content[:800],
+                                    response_status_code=200,
+                                    response_content_length=len(res.content),
+                                    observation_timestamp=now_ts,
+                                    sensitive_data_detected=[pattern["name"]],
+                                    reproduction_confidence=0.99,
                                     references=["https://owasp.org/www-community/vulnerabilities/Use_of_hard-coded_password"]
                                 ))
                                 break
@@ -188,6 +341,17 @@ class ClientBundleSecretLeakAgent(BaseSecurityAgent):
                                             "Please remove it from all client components immediately. The client should ONLY use the public ANON key, "
                                             "and any admin operations must be moved into a server-side route."
                                         ),
+                                        verification_status="confirmed",
+                                        verification_method="active_probe",
+                                        reproduction_curl=curl_cmd,
+                                        expected_secure_behavior="Service role key must strictly remain in private server environments.",
+                                        observed_insecure_behavior="Decoded JWT in public bundle contains 'role: service_role'. Full bypass of RLS.",
+                                        raw_http_response_snippet=content[:800],
+                                        response_status_code=200,
+                                        response_content_length=len(res.content),
+                                        observation_timestamp=now_ts,
+                                        sensitive_data_detected=["supabase_service_role_key"],
+                                        reproduction_confidence=1.0,
                                         references=["https://supabase.com/docs/guides/auth/row-level-security"]
                                     ))
                                     break
@@ -211,6 +375,7 @@ class PublicCloudStorageBucketAgent(BaseSecurityAgent):
 
     async def assess(self, target_url: str, crawl_data: Dict[str, Any], knowledge_context: Optional[str] = None) -> AgentExecutionResult:
         findings = []
+        now_ts = datetime.now(timezone.utc).isoformat()
 
         # Inspect links and page sources for public storage patterns
         storage_patterns = [
@@ -248,6 +413,12 @@ class PublicCloudStorageBucketAgent(BaseSecurityAgent):
                     f"2. Whenever a user wants to view or download a file, generate a temporary signed URL "
                     f"valid for 60 seconds (using supabase.storage.from('{bucket}').createSignedUrl(path, 60))."
                 ),
+                verification_status="suspected",
+                verification_method="passive_observation",
+                expected_secure_behavior="Private storage with temporary authenticated pre-signed URLs.",
+                observed_insecure_behavior=f"Direct references to public storage endpoint for bucket '{bucket}'.",
+                observation_timestamp=now_ts,
+                reproduction_confidence=0.85,
                 references=["https://supabase.com/docs/guides/storage/security/access-control"]
             ))
 
@@ -271,11 +442,12 @@ class LLMEndpointExposureAgent(BaseSecurityAgent):
 
     async def assess(self, target_url: str, crawl_data: Dict[str, Any], knowledge_context: Optional[str] = None) -> AgentExecutionResult:
         findings = []
+        now_ts = datetime.now(timezone.utc).isoformat()
         parsed = urlparse(target_url)
         base = f"{parsed.scheme}://{parsed.netloc}"
 
         headers = {
-            "User-Agent": "APTAgents-LLMGuard/1.0",
+            "User-Agent": "GrayStrike-LLMGuard/1.0",
             "Content-Type": "application/json"
         }
 
@@ -287,6 +459,8 @@ class LLMEndpointExposureAgent(BaseSecurityAgent):
         async with httpx.AsyncClient(timeout=6.0, headers=headers, follow_redirects=False) as client:
             for ep in self.AI_ENDPOINTS:
                 url = f"{base}{ep}"
+                curl_cmd = f"curl -sS -i -X POST '{url}' -H 'Content-Type: application/json' -d '{json.dumps(test_payload)}'"
+
                 try:
                     resp = await client.post(url, json=test_payload)
                     if resp.status_code == 200:
@@ -299,7 +473,7 @@ class LLMEndpointExposureAgent(BaseSecurityAgent):
                                 cwe_id=self.cwe_default,
                                 owasp_ref=self.owasp_default,
                                 severity=AgentSeverity.HIGH,
-                                confidence=0.92,
+                                confidence=0.95,
                                 risk_score=0.85,
                                 affected_asset=url,
                                 evidence_summary=f"Public HTTP POST to '{url}' without session auth returned HTTP 200 with LLM response payload ({len(resp.text)} bytes).",
@@ -312,6 +486,18 @@ class LLMEndpointExposureAgent(BaseSecurityAgent):
                                     f"1. Check for a valid user session (e.g., const session = await auth(); if (!session) return new Response('Unauthorized', {{ status: 401 }});). "
                                     f"2. Add rate limiting with @upstash/ratelimit so each user/IP can only send 5 requests per minute."
                                 ),
+                                verification_status="confirmed",
+                                verification_method="active_probe",
+                                reproduction_curl=curl_cmd,
+                                expected_secure_behavior="HTTP 401 Unauthorized or HTTP 403 Forbidden without authenticated session cookie.",
+                                observed_insecure_behavior=f"HTTP 200 returned with active LLM completion response ({len(resp.text)} bytes) without session token.",
+                                raw_http_request=f"POST {ep} HTTP/1.1\nHost: {parsed.netloc}\nContent-Type: application/json\n\n{json.dumps(test_payload)}",
+                                raw_http_response_snippet=resp.text[:1000],
+                                response_status_code=resp.status_code,
+                                response_content_length=len(resp.content),
+                                observation_timestamp=now_ts,
+                                sensitive_data_detected=["unauthenticated_ai_completion"],
+                                reproduction_confidence=0.95,
                                 references=["https://owasp.org/www-project-top-10-for-large-language-model-applications/"]
                             ))
                             break
@@ -338,11 +524,12 @@ class WebhookSignatureIntegrityAgent(BaseSecurityAgent):
 
     async def assess(self, target_url: str, crawl_data: Dict[str, Any], knowledge_context: Optional[str] = None) -> AgentExecutionResult:
         findings = []
+        now_ts = datetime.now(timezone.utc).isoformat()
         parsed = urlparse(target_url)
         base = f"{parsed.scheme}://{parsed.netloc}"
 
         headers = {
-            "User-Agent": "APTAgents-WebhookAuditor/1.0",
+            "User-Agent": "GrayStrike-WebhookAuditor/1.0",
             "Content-Type": "application/json"
         }
 
@@ -355,6 +542,8 @@ class WebhookSignatureIntegrityAgent(BaseSecurityAgent):
         async with httpx.AsyncClient(timeout=5.0, headers=headers, follow_redirects=False) as client:
             for path in self.WEBHOOK_PATHS:
                 url = f"{base}{path}"
+                curl_cmd = f"curl -sS -i -X POST '{url}' -H 'Content-Type: application/json' -d '{json.dumps(dummy_event)}'"
+
                 try:
                     resp = await client.post(url, json=dummy_event)
                     if resp.status_code in (200, 201, 204):
@@ -378,6 +567,18 @@ class WebhookSignatureIntegrityAgent(BaseSecurityAgent):
                                 f"2. Verifies the signature header: 'stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)'. "
                                 f"3. Returns 'new Response('Invalid signature', {{ status: 400 }})' if verification fails."
                             ),
+                            verification_status="confirmed",
+                            verification_method="active_probe",
+                            reproduction_curl=curl_cmd,
+                            expected_secure_behavior="HTTP 400 Bad Request: Missing or invalid cryptographic webhook signature header.",
+                            observed_insecure_behavior=f"Received HTTP {resp.status_code} accepting unsigned forged synthetic webhook payload.",
+                            raw_http_request=f"POST {path} HTTP/1.1\nHost: {parsed.netloc}\nContent-Type: application/json\n\n{json.dumps(dummy_event)}",
+                            raw_http_response_snippet=resp.text[:800],
+                            response_status_code=resp.status_code,
+                            response_content_length=len(resp.content),
+                            observation_timestamp=now_ts,
+                            sensitive_data_detected=["forged_payment_event_accepted"],
+                            reproduction_confidence=0.98,
                             references=["https://docs.stripe.com/webhooks/signatures"]
                         ))
                         break
@@ -404,17 +605,20 @@ class ClientSideAuthBypassAgent(BaseSecurityAgent):
 
     async def assess(self, target_url: str, crawl_data: Dict[str, Any], knowledge_context: Optional[str] = None) -> AgentExecutionResult:
         findings = []
+        now_ts = datetime.now(timezone.utc).isoformat()
         parsed = urlparse(target_url)
         base = f"{parsed.scheme}://{parsed.netloc}"
 
         headers = {
-            "User-Agent": "APTAgents-AuthAuditor/1.0",
+            "User-Agent": "GrayStrike-AuthAuditor/1.0",
             "Accept": "application/json"
         }
 
         async with httpx.AsyncClient(timeout=5.0, headers=headers, follow_redirects=False) as client:
             for path in self.ADMIN_API_PATHS:
                 url = f"{base}{path}"
+                curl_cmd = f"curl -sS -i '{url}' -H 'Accept: application/json'"
+
                 try:
                     resp = await client.get(url)
                     if resp.status_code == 200 and ("application/json" in resp.headers.get("content-type", "").lower() or resp.text.startswith(("{", "["))):
@@ -427,7 +631,7 @@ class ClientSideAuthBypassAgent(BaseSecurityAgent):
                                 cwe_id=self.cwe_default,
                                 owasp_ref=self.owasp_default,
                                 severity=AgentSeverity.CRITICAL,
-                                confidence=0.95,
+                                confidence=0.96,
                                 risk_score=0.95,
                                 affected_asset=url,
                                 evidence_summary=f"Unauthenticated HTTP GET to '{url}' returned HTTP 200 with private JSON data ({len(resp.text)} bytes).",
@@ -441,6 +645,18 @@ class ClientSideAuthBypassAgent(BaseSecurityAgent):
                                     f"  return new Response('Unauthorized: Admin access required', {{ status: 403 }}); "
                                     f"}}"
                                 ),
+                                verification_status="confirmed",
+                                verification_method="active_probe",
+                                reproduction_curl=curl_cmd,
+                                expected_secure_behavior="HTTP 401 Unauthorized or HTTP 403 Forbidden without valid admin session token.",
+                                observed_insecure_behavior=f"HTTP 200 returned with administrative JSON payload ({len(resp.text)} bytes) to anonymous client.",
+                                raw_http_request=f"GET {path} HTTP/1.1\nHost: {parsed.netloc}\nAccept: application/json",
+                                raw_http_response_snippet=resp.text[:800],
+                                response_status_code=resp.status_code,
+                                response_content_length=len(resp.content),
+                                observation_timestamp=now_ts,
+                                sensitive_data_detected=["admin_json_data"],
+                                reproduction_confidence=0.96,
                                 references=["https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/"]
                             ))
                             break

@@ -125,13 +125,26 @@ async def run_security_agents(state: ScanState) -> Dict[str, Any]:
         for idx, f in enumerate(all_findings):
             # Capture browser proof for top candidates matching web assets
             asset = f.get("affected_asset", "")
-            if idx < 3 and asset.startswith(("http://", "https://")):
+            if idx < 5 and asset.startswith(("http://", "https://")):
                 try:
                     evidence = await verifier.verify_finding(f)
                     if evidence.screenshot_path:
                         f["screenshot_url"] = evidence.screenshot_path
                     if evidence.verification_status:
                         f["verification_status"] = evidence.verification_status
+                    if evidence.reproduction_curl and not f.get("reproduction_curl"):
+                        f["reproduction_curl"] = evidence.reproduction_curl
+                    if evidence.expected_behavior and not f.get("expected_secure_behavior"):
+                        f["expected_secure_behavior"] = evidence.expected_behavior
+                    if evidence.observed_behavior and not f.get("observed_insecure_behavior"):
+                        f["observed_insecure_behavior"] = evidence.observed_behavior
+                    if evidence.response_status_code and not f.get("response_status_code"):
+                        f["response_status_code"] = evidence.response_status_code
+                    if evidence.verification_timestamp and not f.get("observation_timestamp"):
+                        f["observation_timestamp"] = evidence.verification_timestamp
+                    if evidence.sensitive_indicators:
+                        existing_sens = f.get("sensitive_data_detected") or []
+                        f["sensitive_data_detected"] = list(set(existing_sens + evidence.sensitive_indicators))
                 except Exception:
                     pass
             verified_findings.append(f)

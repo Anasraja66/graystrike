@@ -187,6 +187,21 @@ async def _run_scan_async(scan_id: str):
                     ))
                 persisted_findings.append(existing)
             else:
+                # Determine exact verification status enum
+                v_stat_raw = f_dict.get("verification_status", "probable").lower()
+                if v_stat_raw == "confirmed":
+                    v_enum = VerificationStatus.CONFIRMED
+                elif v_stat_raw == "inconclusive":
+                    v_enum = VerificationStatus.NEEDS_REVIEW
+                elif v_stat_raw == "suspected":
+                    v_enum = VerificationStatus.PROBABLE
+                elif v_stat_raw == "false_positive":
+                    v_enum = VerificationStatus.FALSE_POSITIVE
+                else:
+                    v_enum = VerificationStatus.NEEDS_REVIEW
+
+                v_method = f_dict.get("verification_method") or ("playwright_browser_verifier" if f_dict.get("screenshot_url") else "deterministic_probe")
+
                 # Brand new finding
                 new_finding = Finding(
                     scan_id=scan.id,
@@ -200,14 +215,16 @@ async def _run_scan_async(scan_id: str):
                     affected_asset=asset,
                     evidence_summary=f_dict.get("evidence_summary", ""),
                     screenshot_url=f_dict.get("screenshot_url"),
+                    http_request=f_dict.get("reproduction_curl") or f_dict.get("raw_http_request") or f_dict.get("http_request"),
+                    http_response=f_dict.get("raw_http_response_snippet") or f_dict.get("http_response"),
                     severity=sev_enum,
                     confidence=f_dict.get("confidence", 0.8),
                     risk_score=f_dict.get("risk_score", 0.5),
                     status=FindingStatus.OPEN,
                     first_seen_at=now_utc,
                     last_seen_at=now_utc,
-                    verification_status=VerificationStatus.CONFIRMED if f_dict.get("verification_status") == "confirmed" else VerificationStatus.PROBABLE,
-                    verification_method="playwright_browser_verifier" if f_dict.get("screenshot_url") else "heuristic_pattern_analysis",
+                    verification_status=v_enum,
+                    verification_method=v_method,
                     technical_explanation=f_dict.get("technical_explanation", ""),
                     remediation_steps=f_dict.get("remediation_steps", ""),
                     business_impact=f_dict.get("business_impact", ""),
@@ -217,13 +234,30 @@ async def _run_scan_async(scan_id: str):
                 db.add(new_finding)
                 persisted_findings.append(new_finding)
 
-                # Add structured evidence provenance
-                db.add(FindingEvidence(
-                    finding=new_finding,
-                    evidence_type="browser_screenshot" if new_finding.screenshot_url else "http_response",
-                    content=new_finding.evidence_summary,
-                    file_url=new_finding.screenshot_url
-                ))
+                # Add structured evidence provenance records
+                if new_finding.screenshot_url:
+                    db.add(FindingEvidence(
+                        finding=new_finding,
+                        evidence_type="browser_screenshot",
+                        content="Headless Chromium browser rendered evidence screenshot.",
+                        file_url=new_finding.screenshot_url
+                    ))
+
+                if f_dict.get("reproduction_curl"):
+                    db.add(FindingEvidence(
+                        finding=new_finding,
+                        evidence_type="reproduction_curl",
+                        content=f_dict.get("reproduction_curl"),
+                        file_url=None
+                    ))
+
+                if f_dict.get("raw_http_response_snippet"):
+                    db.add(FindingEvidence(
+                        finding=new_finding,
+                        evidence_type="http_response_snippet",
+                        content=f_dict.get("raw_http_response_snippet"),
+                        file_url=None
+                    ))
 
         # Update Scan metrics
         crawl_res = final_state.get("crawl_result") or {}

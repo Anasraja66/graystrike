@@ -1,6 +1,6 @@
 """
 Base Security Agent Interface & Registry
-Defines the contract that all 20 security micro-agents adhere to.
+Defines the contract that all 41+ security micro-agents adhere to, with structured verification evidence.
 """
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
@@ -33,6 +33,20 @@ class AgentFinding(BaseModel):
     ai_fix_prompt: Optional[str] = None
     business_impact: Optional[str] = None
     references: List[str] = Field(default_factory=list)
+
+    # === NEW: Structured Verification Evidence (P0 Deep-Tech Upgrade) ===
+    verification_status: str = "suspected"  # confirmed | suspected | inconclusive | false_positive
+    verification_method: Optional[str] = None  # active_probe | passive_observation | browser_verification | dns_lookup
+    reproduction_curl: Optional[str] = None  # Exact cURL command to reproduce the finding
+    expected_secure_behavior: Optional[str] = None  # What the response SHOULD look like if secure
+    observed_insecure_behavior: Optional[str] = None  # What we actually observed
+    raw_http_request: Optional[str] = None  # Full HTTP request string
+    raw_http_response_snippet: Optional[str] = None  # Response body/headers snippet
+    response_status_code: Optional[int] = None  # HTTP status code observed
+    response_content_length: Optional[int] = None  # Size of response body in bytes
+    observation_timestamp: Optional[str] = None  # ISO 8601 timestamp
+    sensitive_data_detected: List[str] = Field(default_factory=list)  # e.g. ["email", "phone", "api_key", "password_hash"]
+    reproduction_confidence: float = Field(default=0.5, ge=0.0, le=1.0)  # Mathematical confidence of reproduction
 
 
 class AgentExecutionResult(BaseModel):
