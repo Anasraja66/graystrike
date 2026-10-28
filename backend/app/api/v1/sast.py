@@ -13,7 +13,7 @@ from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel, Field
 
-router = APIRouter(prefix="/sast", tags=["sast"])
+router = APIRouter(tags=["sast"])
 
 
 # =============================================================
