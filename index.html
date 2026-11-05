@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrayStrike — Autonomous Cybersecurity & 1-Click Auto-Remediation</title>
+  <meta name="description" content="Traditional scanners give you a 50-page PDF. GrayStrike actually fixes your website vulnerabilities with 1 click across WordPress, Shopify, Cloudflare, and GitHub.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              dark: '#080c14',
+              surface: '#0f172a',
+              card: '#131d33',
+              border: '#1e293b',
+              accent: '#10b981',      // Neon Emerald
+              cyan: '#06b6d4',        // Cyber Cyan
+              blue: '#3b82f6',
+              danger: '#ef4444',
+              warning: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070b12;
+      color: #f1f5f9;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .neon-glow-emerald {
+      box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.35);
+    }
+    .neon-glow-cyan {
+      box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.35);
+    }
+    .grid-bg {
+      background-image: radial-gradient(rgba(30, 41, 59, 0.6) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .glass {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="grid-bg selection:bg-brand-accent selection:text-black">
+
+  <!-- ========================================================================= -->
+  <!-- 1. NAVIGATION BAR -->
+  <!-- ========================================================================= -->
+  <nav class="sticky top-0 z-50 glass border-b border-slate-800/80 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- Logo -->
+      <a href="#" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-cyan to-blue-500 p-0.5 shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-all">
+          <div class="w-full h-full bg-[#090d16] rounded-[10px] flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-5 h-5 text-brand-accent"></i>
+          </div>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
+            GrayStrike <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-brand-accent border border-emerald-500/30 uppercase tracking-widest font-mono">Agentic</span>
+          </span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
+        <a href="#how-it-works" class="hover:text-brand-accent transition-colors">How It Works</a>
+        <a href="#connectors" class="hover:text-brand-accent transition-colors">Universal Connectors</a>
+        <a href="#live-demo" class="hover:text-brand-accent transition-colors">Live Audit Engine</a>
+        <a href="#pricing" class="hover:text-brand-accent transition-colors">Pricing</a>
+        <a href="#faq" class="hover:text-brand-accent transition-colors">FAQ</a>
+      </div>
+
+      <!-- Header CTAs -->
+      <div class="flex items-center space-x-4">
+        <button onclick="scrollToAudit()" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition">
+          Sign In
+        </button>
+        <button onclick="scrollToAudit()" class="relative inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-black bg-brand-accent hover:bg-emerald-400 rounded-xl transition shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98]">
+          <i data-lucide="scan" class="w-4 h-4"></i>
+          <span>Run Free Audit</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========================================================================= -->
+  <!-- 2. HERO SECTION -->
+  <!-- ========================================================================= -->
+  <header class="relative pt-20 pb-28 px-6 overflow-hidden">
+    <!-- Ambient Glow Blobs -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[250px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-5xl mx-auto text-center relative z-10">
+      <!-- Pill Badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-emerald-500/30 text-emerald-400 text-xs font-semibold tracking-wide uppercase mb-8 shadow-inner shadow-emerald-500/10">
+        <span class="w-2 h-2 rounded-full bg-brand-accent animate-ping"></span>
+        <span>2026 Autonomous Cyber AI • SMT Proof & Auto-Patch Engine</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1] mb-6">
+        Traditional Scanners Give You a 50-Page PDF. <br class="hidden sm:block"/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+          GrayStrike Actually Fixes Your Website.
+        </span>
+      </h1>
+
+      <!-- Subheadline -->
+      <p class="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 font-normal leading-relaxed mb-10">
+        Meet the world’s first autonomous cybersecurity agent that detects vulnerabilities with mathematical evidence—and patches them in your code, WordPress, or Cloudflare with a single click.
+      </p>
+
+      <!-- Interactive Quick Audit Input Box -->
+      <div id="hero-audit-box" class="max-w-2xl mx-auto p-2 rounded-2xl glass border border-slate-700/80 shadow-2xl neon-glow-emerald">
+        <div class="flex flex-col sm:flex-row items-center gap-2">
+          <div class="flex items-center flex-1 w-full px-4 py-2.5 bg-slate-900/80 rounded-xl border border-slate-800">
+            <i data-lucide="globe" class="w-5 h-5 text-emerald-400 mr-3"></i>
+            <input 
+              type="text" 
+              id="target-input" 
+              value="elixlumi.com" 
+              placeholder="Enter domain (e.g. yourstore.com)" 
+              class="w-full bg-transparent text-white placeholder-slate-500 focus:outline-none font-mono text-sm"
+            />
+          </div>
+          <button 
+            id="audit-btn" 
+            onclick="triggerLiveAudit()"
+            class="w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl flex items-center justify-center gap-2 transition hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/25"
+          >
+            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+            <span>Audit & Auto-Fix</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm text-slate-400 font-medium">
+        <div class="flex items-center gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+          <span>100% Non-Intrusive & Safe</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="lock" class="w-4 h-4 text-emerald-400"></i>
+          <span>Zero Passwords or Root Access Needed</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4 text-emerald-400"></i>
+          <span>95+ Vulnerability Checks in 10s</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 3. LIVE SIMULATION AUDIT SECTION (DYNAMIC FEEDBACK) -->
+  <!-- ========================================================================= -->
+  <section id="live-audit-result" class="py-12 px-6 max-w-6xl mx-auto hidden transition-all duration-500">
+    <div class="glass rounded-3xl p-6 sm:p-8 border border-emerald-500/40 neon-glow-emerald">
+      
+      <!-- Scan Status Banner -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+        <div>
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              INITIAL GRADE: C+ (Moderate Risk)
+            </span>
+            <span id="target-display" class="font-mono text-slate-300 font-bold text-lg">https://elixlumi.com</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">Hostinger Cloud CDN • Node.js (Express) Detected • Let's Encrypt Active</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="downloadAuditPdf()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 border border-slate-700">
+            <i data-lucide="file-text" class="w-4 h-4 text-red-400"></i>
+            <span>Executive PDF</span>
+          </button>
+          <button onclick="applyAutoFix()" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>1-Click Auto-Fix All (A+)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vulnerabilities Matrix -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        
+        <!-- Finding 1 -->
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-red-500/30 flex items-start gap-3">
+          <div class="p-2 rounded-xl bg-red-500/10 text-red-400 mt-1">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-red-400 uppercase">HIGH • CWE-942</span>
+              <span class="text-xs text-slate-500 font-mono">SEC-001</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mt-1">Permissive CORS Wildcard (`Origin: *`)</h4>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Top-level root permits arbitrary domains to issue authenticated requests and exfiltrate customer cart/session data.</p>
+            <div class="mt-2 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded border border-emerald-800/40 inline-block">
+              Auto-Fix: Origin whitelisted to verified domain
+            </div>
+          </div>
+        </div>
+
+        <!-- Finding 2 -->
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-amber-500/30 flex items-start gap-3">
+          <div class="p-2 rounded-xl bg-amber-500/10 text-amber-400 mt-1">
+            <i data-lucide="shield-x" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-amber-400 uppercase">MEDIUM • CWE-1021</span>
+              <span class="text-xs text-slate-500 font-mono">SEC-002</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mt-1">Missing Clickjacking Defense (X-Frame-Options)</h4>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Website can be framed inside malicious hidden iframes to execute phishing clicks.</p>
+            <div class="mt-2 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded border border-emerald-800/40 inline-block">
+              Auto-Fix: Injected X-Frame-Options: SAMEORIGIN
+            </div>
+          </div>
+        </div>
+
+        <!-- Finding 3 -->
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-amber-500/30 flex items-start gap-3">
+          <div class="p-2 rounded-xl bg-amber-500/10 text-amber-400 mt-1">
+            <i data-lucide="radio" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-amber-400 uppercase">MEDIUM • CWE-319</span>
+              <span class="text-xs text-slate-500 font-mono">SEC-003</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mt-1">Missing HSTS (Strict-Transport-Security)</h4>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Browsers not strictly instructed to reject plain HTTP, enabling SSL-stripping Wi-Fi attacks.</p>
+            <div class="mt-2 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded border border-emerald-800/40 inline-block">
+              Auto-Fix: Added max-age=31536000; includeSubDomains; preload
+            </div>
+          </div>
+        </div>
+
+        <!-- Finding 4 -->
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-blue-500/30 flex items-start gap-3">
+          <div class="p-2 rounded-xl bg-blue-500/10 text-blue-400 mt-1">
+            <i data-lucide="code" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-blue-400 uppercase">LOW • CWE-200</span>
+              <span class="text-xs text-slate-500 font-mono">SEC-005</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mt-1">Backend Fingerprint Exposed (`x-powered-by: Express`)</h4>
+            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Reveals runtime framework and hosting panel to potential attackers during recon.</p>
+            <div class="mt-2 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded border border-emerald-800/40 inline-block">
+              Auto-Fix: app.disable('x-powered-by') applied
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Remediation Code Diff Drawer -->
+      <div id="remediation-diff-box" class="mt-6 p-4 rounded-2xl bg-[#090d16] border border-slate-800 font-mono text-xs overflow-x-auto text-slate-300">
+        <div class="flex items-center justify-between text-slate-400 pb-2 border-b border-slate-800 mb-3">
+          <span class="flex items-center gap-2 text-emerald-400 font-bold">
+            <i data-lucide="terminal" class="w-4 h-4"></i>
+            <span>Synthesized Minimal-Diff Patch (Ready to Merge)</span>
+          </span>
+          <span class="text-[11px]">server.js</span>
+        </div>
+        <pre class="text-slate-300 leading-relaxed"><code><span class="text-red-400">- app.use(cors({ origin: '*' }));</span>
+<span class="text-emerald-400">+ const helmet = require('helmet');
++ app.disable('x-powered-by');
++ app.use(cors({ origin: ['https://elixlumi.com'], credentials: true }));
++ app.use(helmet({ hsts: { maxAge: 31536000, preload: true }, frameguard: { action: 'sameorigin' } }));</span></code></pre>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 4. LOGO TICKER: SUPPORTED ECOSYSTEMS -->
+  <!-- ========================================================================= -->
+  <section class="py-12 border-y border-slate-800/80 bg-slate-950/40">
+    <div class="max-w-7xl mx-auto px-6 text-center">
+      <p class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-8">
+        Seamlessly Protecting Websites Across Every Global Platform
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-slate-400 font-semibold text-sm sm:text-base">
+        <span class="flex items-center gap-2 hover:text-white transition"><i data-lucide="box" class="w-5 h-5 text-emerald-400"></i> WordPress</span>
+        <span class="flex items-center gap-2 hover:text-white transition"><i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-400"></i> Shopify</span>
+        <span class="flex items-center gap-2 hover:text-white transition"><i data-lucide="cloud" class="w-5 h-5 text-emerald-400"></i> Cloudflare</span>
+        <span class="flex items-center gap-2 hover:text-white transition"><i data-lucide="server" class="w-5 h-5 text-emerald-400"></i> cPanel & Hostinger</span>
+        <span class="flex items-center gap-2 hover:text-white transition"><i data-lucide="git-pull-request" class="w-5 h-5 text-emerald-400"></i> GitHub & GitLab</span>
+        <span class="flex items-center gap-2 hover:text-white transition"><i data-lucide="layers" class="w-5 h-5 text-emerald-400"></i> Next.js & React</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 5. HOW IT WORKS: THE 3-STEP REVOLUTION -->
+  <!-- ========================================================================= -->
+  <section id="how-it-works" class="py-24 px-6 max-w-7xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <h2 class="text-xs font-bold font-mono tracking-widest uppercase text-emerald-400 mb-3">
+        Autonomous Architecture
+      </h2>
+      <p class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+        From Vulnerability to Verified Fix in 3 Automated Steps
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- Step 1 -->
+      <div class="glass p-8 rounded-3xl border border-slate-800 hover:border-emerald-500/40 transition group hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold text-lg mb-6 group-hover:scale-110 transition">
+          01
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">10-Second Zero-Touch Audit</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Non-intrusive reconnaissance analyzes external attack surface, DNS, SSL parameters, CORS bounds, security headers, and endpoint exposures without causing downtime.
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="glass p-8 rounded-3xl border border-slate-800 hover:border-cyan-500/40 transition group hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-mono font-bold text-lg mb-6 group-hover:scale-110 transition">
+          02
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">Hard Forensic Evidence</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Zero hallucinations. Every finding is verified with raw HTTP response dumps, CWE taxonomy, CVSS severity ratings, and formal mathematical SMT reachability checks.
+        </p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="glass p-8 rounded-3xl border border-slate-800 hover:border-emerald-500/40 transition group hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold text-lg mb-6 group-hover:scale-110 transition">
+          03
+        </div>
+        <h3 class="text-xl font-bold text-white mb-3">1-Click Auto-Remediation</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Select your connector. The GrayStrike agent generates minimal-diff Git PRs, WordPress configuration patches, or Cloudflare Edge rules. Zero manual coding required.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 6. THE 5 UNIVERSAL CONNECTORS -->
+  <!-- ========================================================================= -->
+  <section id="connectors" class="py-24 px-6 bg-slate-950/60 border-t border-slate-800/80">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs font-bold font-mono tracking-widest uppercase text-cyan-400 mb-3">
+          Zero Infrastructure Lock-In
+        </h2>
+        <p class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          How GrayStrike Connects & Fixes Any Platform
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Connector 1 -->
+        <div class="glass p-7 rounded-2xl border border-slate-800 hover:border-slate-700 transition">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 rounded-xl bg-blue-500/10 text-blue-400">
+              <i data-lucide="git-branch" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-white text-base">GitHub / GitLab / Bitbucket</h4>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed mb-4">
+            Connects via official GitHub App. The agent creates an isolated branch, applies code fixes, runs syntax checks, and opens an automated Pull Request for developer approval.
+          </p>
+          <span class="text-[11px] font-mono text-emerald-400">Best for: SaaS, Startups, Next.js, Node.js</span>
+        </div>
+
+        <!-- Connector 2 -->
+        <div class="glass p-7 rounded-2xl border border-slate-800 hover:border-slate-700 transition">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+              <i data-lucide="box" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-white text-base">WordPress & WooCommerce</h4>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed mb-4">
+            No developer needed. GrayStrike WP Connector safely hardens `.htaccess`, injects security headers, and locks down sensitive REST endpoints automatically.
+          </p>
+          <span class="text-[11px] font-mono text-emerald-400">Best for: 43% of the Web, Blogs, E-Commerce</span>
+        </div>
+
+        <!-- Connector 3 -->
+        <div class="glass p-7 rounded-2xl border border-slate-800 hover:border-slate-700 transition">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
+              <i data-lucide="cloud-lightning" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-white text-base">Cloudflare Edge (Universal Fix)</h4>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed mb-4">
+            Don't want to touch server code? GrayStrike injects Cloudflare Transform Rules at the edge in 30 seconds, protecting any legacy website without code edits.
+          </p>
+          <span class="text-[11px] font-mono text-emerald-400">Best for: Shopify, Wix, Custom PHP, Legacy Apps</span>
+        </div>
+
+        <!-- Connector 4 -->
+        <div class="glass p-7 rounded-2xl border border-slate-800 hover:border-slate-700 transition">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400">
+              <i data-lucide="hard-drive" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-white text-base">cPanel / Hostinger / SFTP</h4>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed mb-4">
+            Traditional hosting? Provide secure read/write SFTP access. The agent edits server config files with automated rollback snapshots.
+          </p>
+          <span class="text-[11px] font-mono text-emerald-400">Best for: Shared Hosting, VPS, Dedicated Servers</span>
+        </div>
+
+        <!-- Connector 5 -->
+        <div class="glass p-7 rounded-2xl border border-slate-800 hover:border-slate-700 transition">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
+              <i data-lucide="download" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-white text-base">1-Click Git Unified Patch (.patch)</h4>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed mb-4">
+            Zero-access enterprise policy? Download a standardized `.patch` file and execute `git apply security_fix.patch` in 2 seconds on your local machine.
+          </p>
+          <span class="text-[11px] font-mono text-emerald-400">Best for: Banks, FinTech, Air-Gapped Networks</span>
+        </div>
+
+        <!-- Connector 6 -->
+        <div class="glass p-7 rounded-2xl border border-slate-800 hover:border-slate-700 transition">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 rounded-xl bg-red-500/10 text-red-400">
+              <i data-lucide="file-check" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-white text-base">White-Label Executive PDF</h4>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed mb-4">
+            Instantly export clean, C-suite ready PDF security audit reports featuring company branding, risk heatmaps, and compliance references.
+          </p>
+          <span class="text-[11px] font-mono text-emerald-400">Best for: Agencies, Consultants, Board Presentations</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 7. PRICING TIERS -->
+  <!-- ========================================================================= -->
+  <section id="pricing" class="py-24 px-6 max-w-7xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <h2 class="text-xs font-bold font-mono tracking-widest uppercase text-emerald-400 mb-3">
+        Predictable Pricing
+      </h2>
+      <p class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+        Autonomous Security for Any Scale
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- Tier 1 -->
+      <div class="glass p-8 rounded-3xl border border-slate-800 flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-white">Starter</h3>
+          <p class="text-xs text-slate-400 mt-1">For single store owners and indie founders</p>
+          <div class="mt-6 mb-6">
+            <span class="text-4xl font-extrabold text-white">$99</span>
+            <span class="text-slate-400 text-sm">/ month</span>
+          </div>
+          <ul class="space-y-3 text-xs text-slate-300">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> 1 Active Target Domain</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Daily Automated Re-Scans</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Full Executive PDF Reports</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> 1-Click Git Patch Downloads</li>
+          </ul>
+        </div>
+        <button onclick="scrollToAudit()" class="w-full mt-8 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition border border-slate-700">
+          Start Free Scan
+        </button>
+      </div>
+
+      <!-- Tier 2 (Featured) -->
+      <div class="glass p-8 rounded-3xl border-2 border-emerald-500 relative flex flex-col justify-between neon-glow-emerald">
+        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 text-slate-950 font-bold text-[10px] tracking-widest uppercase rounded-full">
+          MOST POPULAR
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Growth & Agencies</h3>
+          <p class="text-xs text-slate-400 mt-1">For growing brands, digital agencies, and SaaS</p>
+          <div class="mt-6 mb-6">
+            <span class="text-4xl font-extrabold text-white">$299</span>
+            <span class="text-slate-400 text-sm">/ month</span>
+          </div>
+          <ul class="space-y-3 text-xs text-slate-300">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Up to 5 Active Domains</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Automated GitHub PR Dispatcher</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> WordPress & Cloudflare Connectors</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Slack & Webhook Instant Alerts</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> White-Label PDF Branding</li>
+          </ul>
+        </div>
+        <button onclick="scrollToAudit()" class="w-full mt-8 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/25">
+          Deploy Growth Agent
+        </button>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="glass p-8 rounded-3xl border border-slate-800 flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-white">Enterprise Swarm</h3>
+          <p class="text-xs text-slate-400 mt-1">For organizations requiring formal SMT proof</p>
+          <div class="mt-6 mb-6">
+            <span class="text-4xl font-extrabold text-white">Custom</span>
+          </div>
+          <ul class="space-y-3 text-xs text-slate-300">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Unlimited Domains & Repositories</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Dedicated Autonomous Swarm Instance</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> SOC2 & ISO 27001 Evidence Mapping</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> 24/7 Dedicated Cyber Engineer</li>
+          </ul>
+        </div>
+        <button onclick="scrollToAudit()" class="w-full mt-8 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition border border-slate-700">
+          Book Architecture Review
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 8. FAQ SECTION -->
+  <!-- ========================================================================= -->
+  <section id="faq" class="py-24 px-6 max-w-4xl mx-auto border-t border-slate-800/80">
+    <div class="text-center mb-16">
+      <h2 class="text-xs font-bold font-mono tracking-widest uppercase text-emerald-400 mb-3">
+        Client Assurance
+      </h2>
+      <p class="text-3xl font-extrabold text-white tracking-tight">
+        Frequently Asked Questions
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <details class="glass p-6 rounded-2xl border border-slate-800 cursor-pointer group">
+        <summary class="font-bold text-white text-sm flex items-center justify-between list-none">
+          <span>Will the AI agent break my website when fixing code?</span>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition"></i>
+        </summary>
+        <p class="text-xs text-slate-400 mt-4 leading-relaxed">
+          Never. GrayStrike applies AST syntax verification and non-breaking regression checks. On GitHub it submits an isolated Pull Request so developers retain 100% review authority.
+        </p>
+      </details>
+
+      <details class="glass p-6 rounded-2xl border border-slate-800 cursor-pointer group">
+        <summary class="font-bold text-white text-sm flex items-center justify-between list-none">
+          <span>Do I need to hand over root server passwords or AWS master keys?</span>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition"></i>
+        </summary>
+        <p class="text-xs text-slate-400 mt-4 leading-relaxed">
+          No. GrayStrike strictly follows the Principle of Least Privilege. We integrate using official GitHub App tokens, WordPress application passwords, or Cloudflare API keys with restricted permissions.
+        </p>
+      </details>
+
+      <details class="glass p-6 rounded-2xl border border-slate-800 cursor-pointer group">
+        <summary class="font-bold text-white text-sm flex items-center justify-between list-none">
+          <span>Can I download the audit report as an official PDF?</span>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition"></i>
+        </summary>
+        <p class="text-xs text-slate-400 mt-4 leading-relaxed">
+          Yes! Every scan instantly generates a downloadable executive PDF report containing your security score, CWE references, and live network evidence.
+        </p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 9. FINAL BOTTOM CTA -->
+  <!-- ========================================================================= -->
+  <section class="py-20 px-6 text-center relative overflow-hidden bg-gradient-to-b from-slate-950 to-[#070b12]">
+    <div class="max-w-4xl mx-auto glass p-12 rounded-3xl border border-emerald-500/30 neon-glow-emerald">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+        Stop Leaving Your Website Exposed to Modern Attackers
+      </h2>
+      <p class="text-slate-300 text-sm sm:text-base max-w-xl mx-auto mb-8">
+        Run your free 10-second external security audit now and get your instant remediation pack.
+      </p>
+      <button onclick="scrollToAudit()" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-2xl text-sm transition shadow-xl shadow-emerald-500/30 hover:scale-105 active:scale-95">
+        Audit & Fix My Website Now
+      </button>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 10. FOOTER -->
+  <!-- ========================================================================= -->
+  <footer class="py-8 px-6 border-t border-slate-800 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="shield" class="w-4 h-4 text-emerald-400"></i>
+        <span class="text-slate-400 font-semibold">GrayStrike Technologies Inc.</span>
+        <span>© 2026. All rights reserved.</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="#" class="hover:text-slate-300 transition">Privacy Policy</a>
+        <a href="#" class="hover:text-slate-300 transition">Terms of Service</a>
+        <a href="#" class="hover:text-slate-300 transition">Security Disclosure</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: INTERACTIVE LIVE DEMO LOGIC -->
+  <!-- ========================================================================= -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    function scrollToAudit() {
+      const box = document.getElementById('hero-audit-box');
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('target-input').focus();
+    }
+
+    function triggerLiveAudit() {
+      const input = document.getElementById('target-input');
+      const btn = document.getElementById('audit-btn');
+      const resultSec = document.getElementById('live-audit-result');
+      const targetDisplay = document.getElementById('target-display');
+      
+      const domain = input.value.trim() || 'elixlumi.com';
+      targetDisplay.textContent = 'https://' + domain.replace(/^https?:\/\//, '');
+
+      // Loading state
+      btn.disabled = true;
+      btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full mr-2"></span> Analyzing...`;
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4"></i><span>Audit & Auto-Fix</span>`;
+        lucide.createIcons();
+
+        // Reveal results
+        resultSec.classList.remove('hidden');
+        resultSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 1200);
+    }
+
+    function downloadAuditPdf() {
+      // Direct link to the generated elixlumi report
+      window.open('remediation_pack_elixlumi/elixlumi.com_executive_security_audit.pdf', '_blank');
+    }
+
+    function applyAutoFix() {
+      alert('⚡ GrayStrike Agent: Generating 1-Click Pull Request on repository...\\n\\n[SUCCESS] Pull Request #1 created: "fix(security): Remediate Critical Security Headers & CORS Misconfigurations"\\n\\nWebsite grade upgraded to A+ (Green)!');
+    }
+  </script>
+</body>
+</html>
