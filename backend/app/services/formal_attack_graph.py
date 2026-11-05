@@ -111,12 +111,19 @@ class EvidenceKnowledgeGraph:
 class FormalExploitProof(BaseModel):
     is_mathematically_proven: bool
     satisfaction_status: str  # "SAT" | "UNSAT"
+    model_satisfiable: bool = True  # True if logical model constraints have a valid satisfying assignment
+    exploit_status: str = "model_satisfiable_hypothesis"  # "model_satisfiable_hypothesis" | "confirmed_active_exploit" | "unreachable_unsat"
     reachability_formula: str
     solver_backend: str  # "Z3_SMT_Solver" | "Native_Constraint_Reachability_Engine"
     proof_witness: List[Dict[str, Any]]
     satisfied_constraints: List[str]
     confidence_score: float
     choke_point_formula: str
+    scientific_disclaimer: str = (
+        "Model satisfiability (SAT) mathematically proves a feasible transition path exists within the "
+        "observed constraint model. It does not constitute an unconstrained empirical exploit until active "
+        "end-to-end payload execution is confirmed."
+    )
 
 
 class FormalAttackPathResult(BaseModel):
@@ -218,8 +225,10 @@ class FormalReachabilitySolver:
                     # Unless it's an inherent public property
                     if not pre.startswith("Public"):
                         return FormalExploitProof(
-                            is_mathematically_proven=False,
+                            is_mathematically_proven=True,
                             satisfaction_status="UNSAT",
+                            model_satisfiable=False,
+                            exploit_status="unreachable_unsat",
                             reachability_formula=f"Unsatisfied precondition: '{pre}' at step {idx+1}",
                             solver_backend="Native_Constraint_Reachability_Engine",
                             proof_witness=[],

@@ -344,6 +344,9 @@ class AttackPathEngine:
             p["formal_proof"] = {
                 "is_mathematically_proven": True,
                 "satisfaction_status": "SAT",
+                "model_satisfiable": True,
+                "exploit_status": "model_satisfiable_hypothesis",
+                "scientific_disclaimer": "Model satisfiability (SAT) mathematically proves a feasible transition path exists within the observed constraint model; real-world exploitability requires active runtime authorization and end-to-end payload execution.",
                 "reachability_formula": f"Reachable(Attacker, {p['crown_jewel'].replace(' ', '')}) <=> {formula_str}",
                 "solver_backend": "Formal_SAT_Constraint_Solver",
                 "satisfied_constraints": [

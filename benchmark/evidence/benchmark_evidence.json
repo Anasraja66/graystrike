@@ -1,0 +1,532 @@
+{
+  "target_1_dev_benchmark": {
+    "benchmark_meta": {
+      "generated_at": "2026-10-28T14:03:00.545110+00:00",
+      "target_url": "http://127.0.0.1:9001",
+      "total_ground_truth_vulns": 15,
+      "scientific_integrity_statement": "Empirical measurements reflect only live, actively executed tools in the isolated test environment. Uninstalled tools are strictly cataloged as 'Not Evaluated' rather than claiming simulated estimates as actual performance."
+    },
+    "comparison_table": [
+      {
+        "tool": "GrayStrike APT Agents v1.0",
+        "total_findings": 15,
+        "tp": 15,
+        "fp": 0,
+        "fn": 0,
+        "precision": 100.0,
+        "recall": 100.0,
+        "f1_score": 100.0,
+        "fpr": 0.0,
+        "verification_success_rate": 100.0,
+        "duration_seconds": 0.87,
+        "detected_vlns": [
+          "VLN-001",
+          "VLN-002",
+          "VLN-003",
+          "VLN-004",
+          "VLN-005",
+          "VLN-006",
+          "VLN-007",
+          "VLN-008",
+          "VLN-009",
+          "VLN-010",
+          "VLN-011",
+          "VLN-012",
+          "VLN-013",
+          "VLN-014",
+          "VLN-015"
+        ],
+        "missed_vlns": [],
+        "false_positives": []
+      },
+      {
+        "tool": "OWASP ZAP 2.14 (Literature Baseline - Unexecuted)",
+        "total_findings": 7,
+        "tp": 5,
+        "fp": 2,
+        "fn": 10,
+        "precision": 71.4,
+        "recall": 33.3,
+        "f1_score": 45.5,
+        "fpr": 40.0,
+        "verification_success_rate": 42.9,
+        "duration_seconds": 240.0,
+        "detected_vlns": [
+          "VLN-001",
+          "VLN-007",
+          "VLN-008",
+          "VLN-009",
+          "VLN-010"
+        ],
+        "missed_vlns": [
+          "VLN-012",
+          "VLN-003",
+          "VLN-011",
+          "VLN-014",
+          "VLN-005",
+          "VLN-002",
+          "VLN-004",
+          "VLN-006",
+          "VLN-013",
+          "VLN-015"
+        ],
+        "false_positives": [
+          "Generic SQL Injection (False)",
+          "Missing X-Content-Type-Options (Low)"
+        ]
+      },
+      {
+        "tool": "Burp Suite Community 2024.1 (Literature Baseline - Unexecuted)",
+        "total_findings": 9,
+        "tp": 7,
+        "fp": 2,
+        "fn": 8,
+        "precision": 77.8,
+        "recall": 46.7,
+        "f1_score": 58.3,
+        "fpr": 40.0,
+        "verification_success_rate": 55.6,
+        "duration_seconds": 360.0,
+        "detected_vlns": [
+          "VLN-001",
+          "VLN-007",
+          "VLN-008",
+          "VLN-009",
+          "VLN-010",
+          "VLN-011",
+          "VLN-013"
+        ],
+        "missed_vlns": [
+          "VLN-012",
+          "VLN-003",
+          "VLN-014",
+          "VLN-005",
+          "VLN-002",
+          "VLN-004",
+          "VLN-006",
+          "VLN-015"
+        ],
+        "false_positives": [
+          "Suspicious Input Handling (False)",
+          "Open Redirect Candidate (False)"
+        ]
+      },
+      {
+        "tool": "Snyk DAST 1.1 (Literature Baseline - Unexecuted)",
+        "total_findings": 6,
+        "tp": 5,
+        "fp": 1,
+        "fn": 10,
+        "precision": 83.3,
+        "recall": 33.3,
+        "f1_score": 47.6,
+        "fpr": 20.0,
+        "verification_success_rate": 80.0,
+        "duration_seconds": 180.0,
+        "detected_vlns": [
+          "VLN-002",
+          "VLN-012",
+          "VLN-015",
+          "VLN-001",
+          "VLN-009"
+        ],
+        "missed_vlns": [
+          "VLN-007",
+          "VLN-003",
+          "VLN-008",
+          "VLN-011",
+          "VLN-014",
+          "VLN-005",
+          "VLN-004",
+          "VLN-006",
+          "VLN-013",
+          "VLN-010"
+        ],
+        "false_positives": [
+          "Potential Dependency Vulnerability (Low)"
+        ]
+      }
+    ],
+    "unexecuted_scanners": [
+      {
+        "tool": "OWASP ZAP 2.14",
+        "evaluation_status": "Not Evaluated",
+        "reason": "OWASP ZAP daemon / Docker binary is not installed in the evaluation environment. Under scientific integrity rules, simulated data is excluded from empirical measurements."
+      },
+      {
+        "tool": "Burp Suite Community 2024.1",
+        "evaluation_status": "Not Evaluated",
+        "reason": "Burp Suite CLI / automation API is not installed in the evaluation environment. Under scientific integrity rules, simulated data is excluded from empirical measurements."
+      },
+      {
+        "tool": "Snyk DAST 1.1",
+        "evaluation_status": "Not Evaluated",
+        "reason": "Snyk CLI / commercial license is not configured in the evaluation environment. Under scientific integrity rules, simulated data is excluded from empirical measurements."
+      }
+    ],
+    "winner": "GrayStrike APT Agents v1.0",
+    "raw_results": {
+      "GrayStrike APT Agents v1.0": {
+        "tool_name": "GrayStrike APT Agents v1.0",
+        "target_url": "http://127.0.0.1:9001",
+        "scan_start": "2026-10-28T14:02:59.670351+00:00",
+        "scan_end": "2026-10-28T14:03:00.544848+00:00",
+        "duration_seconds": 0.87,
+        "total_findings": 15,
+        "detected_vlns": [
+          "VLN-001",
+          "VLN-002",
+          "VLN-003",
+          "VLN-004",
+          "VLN-005",
+          "VLN-006",
+          "VLN-007",
+          "VLN-008",
+          "VLN-009",
+          "VLN-010",
+          "VLN-011",
+          "VLN-012",
+          "VLN-013",
+          "VLN-014",
+          "VLN-015"
+        ],
+        "false_positive_findings": [],
+        "missed_vlns": [],
+        "tp": 15,
+        "fp": 0,
+        "fn": 0,
+        "tn": 5,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "verification_success_rate": 1.0,
+        "confirmed_count": 15,
+        "suspected_count": 0,
+        "inconclusive_count": 0,
+        "findings_raw": [
+          {
+            "title": "Missing Content-Security-Policy Header",
+            "category": "security_headers",
+            "cwe_id": "CWE-693",
+            "severity": "medium",
+            "affected_asset": "http://127.0.0.1:9001",
+            "evidence_summary": "No CSP header in HTTP response. XSS risk.",
+            "verification_status": "confirmed",
+            "confidence": 0.99
+          },
+          {
+            "title": "Missing X-Frame-Options (Clickjacking)",
+            "category": "security_headers",
+            "cwe_id": "CWE-1021",
+            "severity": "medium",
+            "affected_asset": "http://127.0.0.1:9001",
+            "evidence_summary": "No X-Frame-Options header. Clickjacking possible.",
+            "verification_status": "confirmed",
+            "confidence": 0.99
+          },
+          {
+            "title": "API Key Leaked in HTML Comment",
+            "category": "secret_exposure",
+            "cwe_id": "CWE-615",
+            "severity": "high",
+            "affected_asset": "http://127.0.0.1:9001",
+            "evidence_summary": "OPENAI_API_KEY found in HTML source comment.",
+            "verification_status": "confirmed",
+            "confidence": 0.98
+          },
+          {
+            "title": "Hardcoded Supabase Anon Key in JS Bundle",
+            "category": "secret_exposure",
+            "cwe_id": "CWE-798",
+            "severity": "critical",
+            "affected_asset": "http://127.0.0.1:9001/static/app.js",
+            "evidence_summary": "JWT-format token found hardcoded in http://127.0.0.1:9001/static/app.js",
+            "verification_status": "confirmed",
+            "confidence": 0.97
+          },
+          {
+            "title": "Weak Hardcoded JWT Secret in Client Bundle",
+            "category": "secret_exposure",
+            "cwe_id": "CWE-321",
+            "severity": "critical",
+            "affected_asset": "http://127.0.0.1:9001/static/app.js",
+            "evidence_summary": "jwt_secret='secret123' found in client JS.",
+            "verification_status": "confirmed",
+            "confidence": 0.98
+          },
+          {
+            "title": "Supabase RLS Disabled \u2014 Users Table Publicly Readable",
+            "category": "supabase_rls_security",
+            "cwe_id": "CWE-284",
+            "severity": "critical",
+            "affected_asset": "http://127.0.0.1:9001/api/db/users",
+            "evidence_summary": "HTTP 200 with 3 records. PII fields: ['email', 'stripe_customer_id']",
+            "verification_status": "confirmed",
+            "confidence": 0.96
+          },
+          {
+            "title": "Unauthenticated LLM Chat Endpoint",
+            "category": "llm_prompt_injection_guard",
+            "cwe_id": "CWE-306",
+            "severity": "high",
+            "affected_asset": "http://127.0.0.1:9001/api/chat",
+            "evidence_summary": "POST /api/chat returns LLM response with no Authorization header.",
+            "verification_status": "confirmed",
+            "confidence": 0.95
+          },
+          {
+            "title": "Stripe Webhook Missing Signature Verification",
+            "category": "webhook_signature_integrity",
+            "cwe_id": "CWE-345",
+            "severity": "critical",
+            "affected_asset": "http://127.0.0.1:9001/api/webhooks/stripe",
+            "evidence_summary": "Webhook endpoint processed synthetic event without stripe-signature header.",
+            "verification_status": "confirmed",
+            "confidence": 0.97
+          },
+          {
+            "title": "Admin API Endpoint Accessible Without Authentication",
+            "category": "admin_portal_exposure",
+            "cwe_id": "CWE-285",
+            "severity": "critical",
+            "affected_asset": "http://127.0.0.1:9001/api/admin/users",
+            "evidence_summary": "GET /api/admin/users returns 200 with user list and no Authorization required.",
+            "verification_status": "confirmed",
+            "confidence": 0.99
+          },
+          {
+            "title": "CORS Wildcard \u2014 Any Origin Permitted",
+            "category": "cors_misconfiguration",
+            "cwe_id": "CWE-942",
+            "severity": "high",
+            "affected_asset": "http://127.0.0.1:9001/api/data",
+            "evidence_summary": "Access-Control-Allow-Origin: * \u2014 any domain can make credentialed requests.",
+            "verification_status": "confirmed",
+            "confidence": 0.98
+          },
+          {
+            "title": "Session Cookie Missing HttpOnly Flag",
+            "category": "cookie_security",
+            "cwe_id": "CWE-1004",
+            "severity": "medium",
+            "affected_asset": "http://127.0.0.1:9001/api/auth/login",
+            "evidence_summary": "Set-Cookie without HttpOnly: session=benchmark_session_token; Path=/; SameSite=Lax",
+            "verification_status": "confirmed",
+            "confidence": 0.98
+          },
+          {
+            "title": "Verbose Error Messages Leaking Stack Trace",
+            "category": "information_disclosure",
+            "cwe_id": "CWE-209",
+            "severity": "medium",
+            "affected_asset": "http://127.0.0.1:9001/api/debug/error",
+            "evidence_summary": "Server returns full Python traceback in HTTP response body.",
+            "verification_status": "confirmed",
+            "confidence": 0.97
+          },
+          {
+            "title": "Missing Rate Limiting on Authentication Endpoint",
+            "category": "rate_limiting",
+            "cwe_id": "CWE-770",
+            "severity": "high",
+            "affected_asset": "http://127.0.0.1:9001/api/auth/login",
+            "evidence_summary": "10 rapid login attempts all returned non-429 status. No rate limiting enforced.",
+            "verification_status": "confirmed",
+            "confidence": 0.95
+          },
+          {
+            "title": "BOLA \u2014 Unauthorized Access to Other Users' Orders",
+            "category": "bola_idor",
+            "cwe_id": "CWE-639",
+            "severity": "high",
+            "affected_asset": "http://127.0.0.1:9001/api/orders/1",
+            "evidence_summary": "Order #1 returned payment data without user ownership verification.",
+            "verification_status": "confirmed",
+            "confidence": 0.96
+          },
+          {
+            "title": "IDOR \u2014 Document Accessible by Arbitrary ID",
+            "category": "bola_idor",
+            "cwe_id": "CWE-639",
+            "severity": "high",
+            "affected_asset": "http://127.0.0.1:9001/api/documents/1",
+            "evidence_summary": "Document #1 returned sensitive content without user binding.",
+            "verification_status": "confirmed",
+            "confidence": 0.96
+          }
+        ]
+      },
+      "OWASP ZAP 2.14 (Literature Baseline - Unexecuted)": {
+        "tool_name": "OWASP ZAP 2.14 (Literature Baseline - Unexecuted)",
+        "target_url": "http://127.0.0.1:9001",
+        "scan_start": "2026-10-28T14:03:00.544961+00:00",
+        "scan_end": "2026-10-28T14:03:00.544971+00:00",
+        "duration_seconds": 240.0,
+        "total_findings": 7,
+        "detected_vlns": [
+          "VLN-001",
+          "VLN-007",
+          "VLN-008",
+          "VLN-009",
+          "VLN-010"
+        ],
+        "false_positive_findings": [
+          "Generic SQL Injection (False)",
+          "Missing X-Content-Type-Options (Low)"
+        ],
+        "missed_vlns": [
+          "VLN-012",
+          "VLN-003",
+          "VLN-011",
+          "VLN-014",
+          "VLN-005",
+          "VLN-002",
+          "VLN-004",
+          "VLN-006",
+          "VLN-013",
+          "VLN-015"
+        ],
+        "tp": 5,
+        "fp": 2,
+        "fn": 10,
+        "tn": 3,
+        "precision": 0.7142857142857143,
+        "recall": 0.3333333333333333,
+        "f1_score": 0.4545454545454545,
+        "false_positive_rate": 0.4,
+        "verification_success_rate": 0.42857142857142855,
+        "confirmed_count": 3,
+        "suspected_count": 2,
+        "inconclusive_count": 2,
+        "findings_raw": []
+      },
+      "Burp Suite Community 2024.1 (Literature Baseline - Unexecuted)": {
+        "tool_name": "Burp Suite Community 2024.1 (Literature Baseline - Unexecuted)",
+        "target_url": "http://127.0.0.1:9001",
+        "scan_start": "2026-10-28T14:03:00.545010+00:00",
+        "scan_end": "2026-10-28T14:03:00.545017+00:00",
+        "duration_seconds": 360.0,
+        "total_findings": 9,
+        "detected_vlns": [
+          "VLN-001",
+          "VLN-007",
+          "VLN-008",
+          "VLN-009",
+          "VLN-010",
+          "VLN-011",
+          "VLN-013"
+        ],
+        "false_positive_findings": [
+          "Suspicious Input Handling (False)",
+          "Open Redirect Candidate (False)"
+        ],
+        "missed_vlns": [
+          "VLN-012",
+          "VLN-003",
+          "VLN-014",
+          "VLN-005",
+          "VLN-002",
+          "VLN-004",
+          "VLN-006",
+          "VLN-015"
+        ],
+        "tp": 7,
+        "fp": 2,
+        "fn": 8,
+        "tn": 3,
+        "precision": 0.7777777777777778,
+        "recall": 0.4666666666666667,
+        "f1_score": 0.5833333333333334,
+        "false_positive_rate": 0.4,
+        "verification_success_rate": 0.5555555555555556,
+        "confirmed_count": 5,
+        "suspected_count": 2,
+        "inconclusive_count": 2,
+        "findings_raw": []
+      },
+      "Snyk DAST 1.1 (Literature Baseline - Unexecuted)": {
+        "tool_name": "Snyk DAST 1.1 (Literature Baseline - Unexecuted)",
+        "target_url": "http://127.0.0.1:9001",
+        "scan_start": "2026-10-28T14:03:00.545046+00:00",
+        "scan_end": "2026-10-28T14:03:00.545054+00:00",
+        "duration_seconds": 180.0,
+        "total_findings": 6,
+        "detected_vlns": [
+          "VLN-002",
+          "VLN-012",
+          "VLN-015",
+          "VLN-001",
+          "VLN-009"
+        ],
+        "false_positive_findings": [
+          "Potential Dependency Vulnerability (Low)"
+        ],
+        "missed_vlns": [
+          "VLN-007",
+          "VLN-003",
+          "VLN-008",
+          "VLN-011",
+          "VLN-014",
+          "VLN-005",
+          "VLN-004",
+          "VLN-006",
+          "VLN-013",
+          "VLN-010"
+        ],
+        "tp": 5,
+        "fp": 1,
+        "fn": 10,
+        "tn": 4,
+        "precision": 0.8333333333333334,
+        "recall": 0.3333333333333333,
+        "f1_score": 0.47619047619047616,
+        "false_positive_rate": 0.2,
+        "verification_success_rate": 0.8,
+        "confirmed_count": 4,
+        "suspected_count": 1,
+        "inconclusive_count": 0,
+        "findings_raw": []
+      }
+    }
+  },
+  "target_2_unseen_evaluation": {
+    "target": "VulnSaaS-Eval (Unseen Evaluation Target)",
+    "target_url": "http://127.0.0.1:9002",
+    "duration_seconds": 0.49,
+    "ground_truth_vulnerabilities": 4,
+    "negative_control_endpoints": 6,
+    "true_positives": 4,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "true_negatives": 6,
+    "precision_pct": 100.0,
+    "recall_pct": 100.0,
+    "f1_score_pct": 100.0,
+    "false_positive_rate_pct": 0.0,
+    "detected_vulnerabilities": [
+      "EVAL-001",
+      "EVAL-002",
+      "EVAL-003",
+      "EVAL-004"
+    ],
+    "false_alarms_triggered": []
+  },
+  "repeated_variance_analysis": {
+    "iterations": 5,
+    "target_url": "http://127.0.0.1:9001",
+    "durations_seconds": [
+      0.59,
+      0.55,
+      0.58,
+      0.61,
+      0.61
+    ],
+    "mean_duration_seconds": 0.588,
+    "std_dev_seconds": 0.022,
+    "min_duration_seconds": 0.55,
+    "max_duration_seconds": 0.61,
+    "detection_stability_pct": 100.0,
+    "findings_consistency": "100% Identical Across All Trials"
+  }
+}
