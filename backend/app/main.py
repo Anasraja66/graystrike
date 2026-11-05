@@ -8,7 +8,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api.v1 import auth, organizations, projects, domains, scans, findings, reports, admin, billing, ci, easm, sast
+from app.api.v1 import auth, organizations, projects, domains, scans, findings, reports, admin, billing, ci, easm, sast, swarm
 from app.services.scheduler_service import start_scheduler_background_loop
 import asyncio
 
@@ -67,6 +67,8 @@ app.include_router(ci.router,            prefix="/api/v1/ci",             tags=[
 app.include_router(easm.router,          prefix="/api/v1/easm",           tags=["Attack Surface Management"])
 app.include_router(admin.router,         prefix="/api/v1/admin",          tags=["Admin"])
 app.include_router(sast.router,          prefix="/api/v1/sast",           tags=["SAST - Static Analysis"])
+app.include_router(swarm.router,         prefix="/api/v1/swarm",          tags=["Multi-Agent Swarm"])
+
 
 
 @app.get("/health")
