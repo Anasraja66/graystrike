@@ -23,7 +23,9 @@ class ProvenanceEvent:
         parent_ids: Optional[List[str]] = None,
         state_snapshot: Optional[Dict[str, Any]] = None,
         state_delta: Optional[Dict[str, Any]] = None,
-        timestamp: Optional[float] = None
+        timestamp: Optional[float] = None,
+        raw_trajectory_ref: Optional[str] = None,
+        evidence_insight_link: Optional[Dict[str, Any]] = None
     ):
         self.event_id = event_id
         self.principal_id = principal_id
@@ -33,6 +35,9 @@ class ProvenanceEvent:
         self.state_snapshot = state_snapshot or {}
         self.state_delta = state_delta or {}
         self.timestamp = timestamp or time.time()
+        # WikiTrace: Evidence-Linked Memory (arXiv:2611.14320)
+        self.raw_trajectory_ref = raw_trajectory_ref or f"trace://run_{event_id}_{principal_id}"
+        self.evidence_insight_link = evidence_insight_link or {"insight": payload.get("action", "unknown"), "linked": True}
 
 
 
