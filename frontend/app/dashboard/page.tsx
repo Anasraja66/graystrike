@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, Plus, Globe, Scan, AlertTriangle, CheckCircle, Clock, LogOut, CreditCard, Key, Sparkles, ArrowRight, Zap, Lock, Flame, GitFork } from "lucide-react";
+import { Shield, Plus, Globe, Scan, AlertTriangle, CheckCircle, Clock, LogOut, CreditCard, Key, Sparkles, ArrowRight, Zap, Lock, Flame, GitFork, Cpu } from "lucide-react";
 import axios from "axios";
 
 export default function DashboardPage() {
@@ -68,6 +68,7 @@ export default function DashboardPage() {
             { href: "/projects", icon: <Globe className="h-5 w-5" />, label: "Projects" },
             { href: "/scans", icon: <Scan className="h-5 w-5" />, label: "Scans" },
             { href: "/findings", icon: <AlertTriangle className="h-5 w-5" />, label: "Findings" },
+            { href: "/remediation", icon: <Cpu className="h-5 w-5 text-indigo-400" />, label: "CEGIS Remediation" },
             { href: "/attack-paths", icon: <GitFork className="h-5 w-5 text-rose-400" />, label: "Attack Paths (Wiz)" },
             { href: "/attack-surface", icon: <Globe className="h-5 w-5 text-cyan-400" />, label: "Attack Surface (EASM)" },
             { href: "/reports", icon: <CheckCircle className="h-5 w-5" />, label: "Reports" },
